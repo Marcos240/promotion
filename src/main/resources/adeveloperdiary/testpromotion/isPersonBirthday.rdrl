@@ -1,0 +1,22 @@
+package adeveloperdiary.testpromotion;
+
+import java.lang.Number;
+
+rule "isPersonBirthday"
+	dialect "mvel"
+	ruleflow-group "tu"
+	when
+		person : Person( bd : birthdate != null )
+		quote : Quote( qd : quoteDate != null )
+		not (Person( calculatedAttributeList contains cc , this == person ) and cc : CalculatedAttribute( key == "personBirthday" )) 
+	then
+		CalculatedAttribute ica = new CalculatedAttribute();
+		ica.setKey( "personBirthday" );
+		ica.setStringValue( new Boolean(isBirthday(bd,qd)).toString() );
+		insert( ica );
+		person.getCalculatedAttributeList().add(ica);
+		modify( person ) {
+				setAge( -1.0 ), 
+				setCalculatedAttributeList( person.getCalculatedAttributeList() )
+		}
+end
